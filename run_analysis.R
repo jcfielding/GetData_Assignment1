@@ -1,24 +1,21 @@
+#This script collects, processes, and cleans a dataset.
+#The goal is to prepare tidy dataset that can be used for later analysis.
 
-
-#Remove before publishing
-setwd("C:/Users/James/Documents/R/GetData_Assignment1")
-
+library(plyr)
 library(dplyr)
 library(data.table)
 
 #Download the data and put in the data folder
-if(!file.exists("./data")){dir.create("./data")}
-fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
-setInternet2(use = TRUE)
-download.file(fileUrl, destfile = "./data/dataset.zip", method = "auto", mode = "wb")
+if(!file.exists("./data")) { dir.create("./data") }
+if(!file.exists("./data/dataset.zip")) {
+  fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+  setInternet2(use = TRUE)
+  download.file(fileUrl, destfile = "./data/dataset.zip", method = "auto", mode = "wb")
+  }
 
 #Unzip the data
-unzip("./data/dataset.zip", exdir = "./data")
-
-#Get the files
 filepath <- file.path("./data", "UCI HAR Dataset")
-#files <-list.files(filepath, recursive = TRUE)
-#files
+if(!file.exists(filepath)) { unzip("./data/dataset.zip", exdir = "./data") }
 
 #Get Activities data
 data.YTest  <- read.table(file.path(filepath, "test" , "Y_test.txt" ), header = FALSE)
@@ -47,14 +44,30 @@ names(data.Features) <- data.FeaturesNames$V2
 data.Combined <- cbind(data.Subject, data.Activity)
 data <- data.table(cbind(data.Features, data.Combined))
 
-#Extracts only the measurements on the mean and standard deviation for each measurement.
-data.Subset <- select(data, contains("mean()"), contains ("std()"), contains ("subject"), contains ("activity"))
+#Extract only the measurements on the mean and standard deviation for each measurement.
+data.Subset <- select(data, contains("mean()"), contains ("std()"), ends_with("subject"), ends_with("activity"))
 
 #Uses descriptive activity names to name the activities in the data set
 data.ActivityLabels <- read.table(file.path(filepath, "activity_labels.txt"),header = FALSE)
 data.Subset$activity <- factor(data.Subset$activity, labels = data.ActivityLabels$V2)
 
-
-
 #Appropriately labels the data set with descriptive variable names. 
-#From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+#prefix t is replaced by time
+names(data.Subset) <- gsub("^t", "time", names(data.Subset))
+#prefix f is replaced by frequency
+names(data.Subset) <- gsub("^f", "frequency", names(data.Subset))
+#Acc is replaced by Accelerometer
+names(data.Subset) <- gsub("Acc", "Accelerometer", names(data.Subset))
+#Gyro is replaced by Gyroscope
+names(data.Subset) <- gsub("Gyro", "Gyroscope", names(data.Subset))
+#Mag is replaced by Magnitude
+names(data.Subset) <- gsub ("Mag", "Magnitude", names(data.Subset))
+#BodyBody is replaced by Body
+names(data.Subset) <- gsub ("BodyBody", "Body", names(data.Subset))
+
+#From the data set in step 4, creates a second, independent tidy data set with the average of each
+#variable for each activity and each subject.
+data.SubSummary <- aggregate(. ~subject + activity, data.Subset, mean)
+data.SubSummary <- data.SubSummary[order(data.SubSummary$subject, data.SubSummary$activity), ]
+write.table(data.SubSummary, file = "tidydata.txt", row.name = FALSE)
+
