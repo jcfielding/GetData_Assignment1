@@ -5,7 +5,7 @@ library(plyr)
 library(dplyr)
 library(data.table)
 
-#Download the data and put in the data folder
+#If local data is not present, download the data and put in the data folder
 if(!file.exists("./data")) { dir.create("./data") }
 if(!file.exists("./data/dataset.zip")) {
   fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
@@ -13,7 +13,7 @@ if(!file.exists("./data/dataset.zip")) {
   download.file(fileUrl, destfile = "./data/dataset.zip", method = "auto", mode = "wb")
   }
 
-#Unzip the data
+#If local zip has not been expanded, unzip the data
 filepath <- file.path("./data", "UCI HAR Dataset")
 if(!file.exists(filepath)) { unzip("./data/dataset.zip", exdir = "./data") }
 
@@ -71,3 +71,4 @@ data.SubSummary <- aggregate(. ~subject + activity, data.Subset, mean)
 data.SubSummary <- data.SubSummary[order(data.SubSummary$subject, data.SubSummary$activity), ]
 write.table(data.SubSummary, file = "tidydata.txt", row.name = FALSE)
 
+write.table(as.table(str(data.SubSummary)), file = "tidydata2.txt", row.name = FALSE)
