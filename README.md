@@ -3,4 +3,6 @@ Activity Recognition dataset. The full description and the data can be found
 [here](http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones).
 The data used for this assignment can be found [here](https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip).
 
-For details see `CodeBook.md`.
+You are currently reading `README.md`.
+To create a tidy dataset, run the script `run_analysis.R`.
+For dataset details see `CODEBOOK.md`.
